@@ -2,7 +2,7 @@
 
 using namespace std;
 
-template <typename T>
+template<typename T>
 class Node {
 public:
     T data;
@@ -11,7 +11,7 @@ public:
     Node(const T &data) : data(data), deleted(0) {};
 };
 
-template <typename T>
+template<typename T>
 class HashTable {
     int bufferSize;
     int size;
@@ -21,7 +21,7 @@ class HashTable {
 
 public:
     HashTable(int bufferSize = 4, int (*p)(const T &x) = nullptr) :
-    bufferSize(bufferSize), p(p) {
+            bufferSize(bufferSize), p(p) {
         size = 0;
         nodes = new Node<T> *[bufferSize];
 
@@ -42,7 +42,7 @@ public:
         return (*p)(key) % bufferSize;
     }
 
-    bool contains(const T& key) {
+    bool contains(const T &key) {
         int hashed = hash(key);
         int i = 0;
         while (nodes[hashed] != nullptr && i < bufferSize) {
@@ -85,7 +85,7 @@ public:
         return false;
     }
 
-    bool remove(const T& key) {
+    bool remove(const T &key) {
         if (!contains(key))
             return false;
 
@@ -126,7 +126,7 @@ public:
         delete[] tmp;
     }
 
-    void print(){
+    void print() {
         if (size == 0) {
             cout << "No elements in hashtable\n";
             return;
@@ -151,7 +151,13 @@ int HashCntString(const string &key) {
     return hashed;
 }
 
+int HashCntInt(const int &key) {
+    return key;
+}
+
 int (*p_string)(const string &s) = &HashCntString;
+
+int (*p_int)(const int &key) = &HashCntInt;
 
 
 int main() {
@@ -164,5 +170,12 @@ int main() {
     my_table.remove("Islam");
     my_table.remove("Islam");
     my_table.print();
+    HashTable<int> my_table2 = HashTable<int>(8, p_int);
+    my_table2.insert(5);
+    my_table2.insert(5);
+    my_table2.insert(2);
+    my_table2.print();
+    my_table2.remove(5);
+    my_table2.print();
     return 0;
 }
