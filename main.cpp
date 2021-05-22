@@ -9,7 +9,7 @@ public:
     T data;
     int deleted;
 
-    Node(const T &data) : data(data), deleted(0) {};
+    Node(const T &data, int deleted = 0) : data(data), deleted(deleted) {};
 };
 
 template<typename T>
@@ -31,11 +31,49 @@ public:
         }
     };
 
+    HashTable(const HashTable<T> &table) {
+        bufferSize = table.bufferSize;
+        size = table.bufferSize;
+        p = table.p;
+        nodes = new Node<T> *[bufferSize];
+
+        for (int i = 0; i < bufferSize; ++i) {
+            if (table.nodes[i] != nullptr) {
+                nodes[i] = new Node<T>(table.nodes[i]->data, table.nodes[i]->deleted);
+            } else {
+                nodes[i] = nullptr;
+            }
+        }
+
+    }
+
     ~HashTable() {
         for (int i = 0; i < bufferSize; ++i)
             if (nodes[i] != nullptr)
                 delete nodes[i];
         delete[] nodes;
+    }
+
+    HashTable<T> &operator=(const HashTable<T> &table) {
+        for (int i = 0; i < bufferSize; ++i)
+            if (nodes[i] != nullptr)
+                delete nodes[i];
+        delete[] nodes;
+
+        bufferSize = table.bufferSize;
+        size = table.bufferSize;
+        p = table.p;
+        nodes = new Node<T> *[bufferSize];
+
+        for (int i = 0; i < bufferSize; ++i) {
+            if (table.nodes[i] != nullptr) {
+                nodes[i] = new Node<T>(table.nodes[i]->data, table.nodes[i]->deleted);
+            } else {
+                nodes[i] = nullptr;
+            }
+        }
+
+        return *this;
     }
 
 
@@ -127,7 +165,7 @@ public:
         delete[] tmp;
     }
 
-    friend ostream &operator <<(ostream &out, const HashTable<T>& table) {
+    friend ostream &operator<<(ostream &out, const HashTable<T> &table) {
         if (table.size == 0) {
             out << "No elements in hashtable\n";
             return out;
@@ -160,7 +198,6 @@ public:
 };
 
 
-
 int HashCntString(const string &key) {
     int hashed = 0;
     for (char c : key) {
@@ -180,29 +217,17 @@ int (*p_int)(const int &key) = &HashCntInt;
 
 
 int main() {
-    HashTable<string> my_table = HashTable<string>(4, p_string);
-    my_table.insert("Hello");
-    my_table.insert("my name is");
-    my_table.insert("Islam");
-    my_table.print();
-    cout << my_table;
-    my_table.remove("Iskan");
-    my_table.remove("Islam");
-    my_table.remove("Islam");
-    my_table.insert("Token1");
-    my_table.insert("Token2");
-    my_table.insert("Token3");
-    my_table.insert("Token4");
-    my_table.print();
-    cout << my_table;
-    HashTable<int> my_table2 = HashTable<int>(8, p_int);
-    my_table2.insert(5);
-    my_table2.insert(5);
-    my_table2.insert(2);
-    my_table2.print();
-    cout << my_table2;
-    my_table2.remove(5);
-    my_table2.print();
-    cout << my_table2;
+    HashTable<string> table = HashTable<string>(8, p_string);
+    table.insert("Token 0");
+    HashTable<string> table2 = HashTable<string>(table);
+    table.insert("Token 1");
+    table2.insert("Token 2");
+    HashTable<string> table3 = HashTable<string>(32, p_string);
+    table3.insert("HAHA");
+    cout << "table:  " << table;
+    cout << "table2:   " << table2;
+    cout << "table3:   " << table3;
+    table3 = table;
+    cout << "table3:   " << table3;
     return 0;
 }
