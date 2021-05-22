@@ -2,6 +2,7 @@
 
 using namespace std;
 
+
 template<typename T>
 class Node {
 public:
@@ -126,6 +127,22 @@ public:
         delete[] tmp;
     }
 
+    friend ostream &operator <<(ostream &out, const HashTable<T>& table) {
+        if (table.size == 0) {
+            out << "No elements in hashtable\n";
+            return out;
+        }
+
+        for (int i = 0; i < table.bufferSize; ++i) {
+            if (table.nodes[i] != nullptr && !table.nodes[i]->deleted) {
+                out << table.nodes[i]->data << " ";
+            }
+        }
+        out << "\n";
+        return out;
+    }
+
+
     void print() {
         if (size == 0) {
             cout << "No elements in hashtable\n";
@@ -141,6 +158,8 @@ public:
     }
 
 };
+
+
 
 int HashCntString(const string &key) {
     int hashed = 0;
@@ -161,21 +180,29 @@ int (*p_int)(const int &key) = &HashCntInt;
 
 
 int main() {
-    HashTable<string> my_table = HashTable<string>(8, p_string);
+    HashTable<string> my_table = HashTable<string>(4, p_string);
     my_table.insert("Hello");
     my_table.insert("my name is");
     my_table.insert("Islam");
     my_table.print();
+    cout << my_table;
     my_table.remove("Iskan");
     my_table.remove("Islam");
     my_table.remove("Islam");
+    my_table.insert("Token1");
+    my_table.insert("Token2");
+    my_table.insert("Token3");
+    my_table.insert("Token4");
     my_table.print();
+    cout << my_table;
     HashTable<int> my_table2 = HashTable<int>(8, p_int);
     my_table2.insert(5);
     my_table2.insert(5);
     my_table2.insert(2);
     my_table2.print();
+    cout << my_table2;
     my_table2.remove(5);
     my_table2.print();
+    cout << my_table2;
     return 0;
 }
