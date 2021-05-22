@@ -31,7 +31,6 @@ int (*type_check_ptr)(const T& x) = &type_check;
 
 
 
-
 template<typename T>
 class HashTable {
     int bufferSize;
@@ -124,16 +123,15 @@ public:
                 return true;
             i++;
             hashed += (i * i + i) / 2;
-            //hashed += i;
             hashed %= bufferSize;
         }
         return false;
     }
 
-    bool insert(const T &key) {
-        if (contains(key))
-            return false;
-
+    void insert(const T &key) {
+        if (contains(key)) {
+            throw EINSERT;
+        }
         if (3 * bufferSize <= 4 * (size + 1))
             rehash();
 
@@ -144,25 +142,23 @@ public:
             if (nodes[hashed] == nullptr) {
                 nodes[hashed] = new Node<T>(key);
                 size++;
-                return true;
             } else if (nodes[hashed]->deleted) {
                 nodes[hashed]->data = key;
                 nodes[hashed]->deleted = false;
                 size++;
-                return true;
             }
             i++;
             hashed += (i * i + i) / 2;
             //hashed += i;
             hashed %= bufferSize;
         }
-        return false;
+        throw EINSERT;
     }
 
-    bool remove(const T &key) {
-        if (!contains(key))
-            return false;
-
+    void remove(const T &key) {
+        if (!contains(key)) {
+            throw EREMOVE;
+        }
         int hashed = hash(key);
         int i = 0;
 
@@ -170,14 +166,12 @@ public:
             if (!nodes[hashed]->deleted && nodes[hashed]->data == key) {
                 nodes[hashed]->deleted = true;
                 size--;
-                return true;
             }
             i++;
             hashed += (i * i + i) / 2;
-            //hashed += i;
             hashed %= bufferSize;
         }
-        return false;
+        throw EREMOVE;
     }
 
 
@@ -222,7 +216,6 @@ int HashCntString(const string &key) {
     int hashed = 0;
     for (char c : key) {
         hashed += 31 * c;
-        //hashed %= bufferSize;
     }
     return hashed;
 }
