@@ -2,7 +2,6 @@
 
 using namespace std;
 
-
 template<typename T>
 class Node {
 public:
@@ -12,13 +11,14 @@ public:
     Node(const T &data, int deleted = 0) : data(data), deleted(deleted) {};
 };
 
-int check_arg(int arg) {
-    if (arg < 0) return 0;
+template <typename T>
+bool check_arg(int arg) {
+    if (arg < 0) return false;
     while (arg > 1) {
-        if (arg % 2) return 0;
+        if (arg % 2) return false;
         arg /= 2;
     }
-    return 1;
+    return true;
 }
 
 template <typename T>
@@ -48,7 +48,7 @@ public:
 
     HashTable(int bufferSize = 4, int (*p)(const T &x) = nullptr) :
             bufferSize(bufferSize), p(p) {
-        if (!check_arg(bufferSize)) {
+        if (bufferSize < 0) {
             throw EINVARG;
         }
 
@@ -212,46 +212,4 @@ public:
 };
 
 
-int HashCntString(const string &key) {
-    int hashed = 0;
-    for (char c : key) {
-        hashed += 31 * c;
-    }
-    return hashed;
-}
 
-int HashCntInt(const int &key) {
-    return key;
-}
-
-
-int (*p_string)(const string &s) = &HashCntString;
-
-int (*p_int)(const int &key) = &HashCntInt;
-
-
-
-
-
-int main() {
-    try{
-        HashTable<int> LOL = HashTable<int> (-3, p_int);
-    } catch (const HashTable<int>::hash_table_error &er) {
-        if (er == HashTable<int>::EINVARG) {
-            cout << "Test is working \n";
-        }
-    }
-    HashTable<string> table = HashTable<string>(8, p_string);
-    table.insert("Token 0");
-    HashTable<string> table2 = HashTable<string>(table);
-    table.insert("Token 1");
-    table2.insert("Token 2");
-    HashTable<string> table3 = HashTable<string>(32, p_string);
-    table3.insert("HAHA");
-    cout << "table:  " << table;
-    cout << "table2:   " << table2;
-    cout << "table3:   " << table3;
-    table3 = table;
-    cout << "table3:   " << table3;
-    return 0;
-}
