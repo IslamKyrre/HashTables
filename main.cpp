@@ -12,6 +12,16 @@ public:
     Node(const T &data, int deleted = 0) : data(data), deleted(deleted) {};
 };
 
+int check_arg(int arg) {
+    if (arg < 0) return 0;
+    while (arg > 1) {
+        if (arg % 2) return 0;
+        arg /= 2;
+    }
+    return 1;
+}
+
+
 template<typename T>
 class HashTable {
     int bufferSize;
@@ -21,8 +31,17 @@ class HashTable {
     int (*p)(const T &x);
 
 public:
+    enum hash_table_error {
+        EINVARG = 1,
+        EINSERT,
+        EREMOVE
+    };
+
     HashTable(int bufferSize = 4, int (*p)(const T &x) = nullptr) :
             bufferSize(bufferSize), p(p) {
+        if (!check_arg(bufferSize)) {
+            throw EINVARG;
+        }
         size = 0;
         nodes = new Node<T> *[bufferSize];
 
@@ -217,6 +236,13 @@ int (*p_int)(const int &key) = &HashCntInt;
 
 
 int main() {
+    try{
+        HashTable<int> LOL = HashTable<int> (-3, p_int);
+    } catch (const HashTable<int>::hash_table_error &er) {
+        if (er == HashTable<int>::EINVARG) {
+            cout << "Test is working \n";
+        }
+    }
     HashTable<string> table = HashTable<string>(8, p_string);
     table.insert("Token 0");
     HashTable<string> table2 = HashTable<string>(table);
