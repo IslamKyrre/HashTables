@@ -2,23 +2,28 @@
 
 using namespace std;
 
+template <typename T>
 class Node {
 public:
-    string data;
+    T data;
     int deleted;
 
-    Node(const string &data) : data(data), deleted(0) {};
+    Node(const T &data) : data(data), deleted(0) {};
 };
 
+template <typename T>
 class HashTable {
     int bufferSize;
     int size;
-    Node **nodes;
+    Node<T> **nodes;
+
+    int (*p)(const T &x);
 
 public:
-    HashTable(int bufferSize = 4) : bufferSize(bufferSize) {
+    HashTable(int bufferSize = 4, int (*p)(const T &x) = nullptr) :
+    bufferSize(bufferSize), p(p) {
         size = 0;
-        nodes = new Node *[bufferSize];
+        nodes = new Node<T> *[bufferSize];
 
         for (int i = 0; i < bufferSize; ++i) {
             nodes[i] = nullptr;
@@ -32,16 +37,12 @@ public:
         delete[] nodes;
     }
 
-    int hash(const string &key) {
-        int hashed = 0;
-        for (char c : key) {
-            hashed += 31 * c;
-            hashed %= bufferSize;
-        }
-        return hashed;
+
+    int hash(const T &key) {
+        return (*p)(key) % bufferSize;
     }
 
-    bool contains(const string& key) {
+    bool contains(const T& key) {
         int hashed = hash(key);
         int i = 0;
         while (nodes[hashed] != nullptr && i < bufferSize) {
@@ -55,7 +56,7 @@ public:
         return false;
     }
 
-    bool insert(const string &key) {
+    bool insert(const T &key) {
         if (contains(key))
             return false;
 
@@ -67,7 +68,7 @@ public:
 
         while (i < bufferSize) {
             if (nodes[hashed] == nullptr) {
-                nodes[hashed] = new Node(key);
+                nodes[hashed] = new Node<T>(key);
                 size++;
                 return true;
             } else if (nodes[hashed]->deleted) {
@@ -84,7 +85,7 @@ public:
         return false;
     }
 
-    bool remove(const string& key) {
+    bool remove(const T& key) {
         if (!contains(key))
             return false;
 
@@ -107,10 +108,10 @@ public:
 
 
     void rehash() {
-        Node **tmp = nodes;
+        Node<T> **tmp = nodes;
         bufferSize *= 2;
         size = 0;
-        nodes = new Node *[bufferSize];
+        nodes = new Node<T> *[bufferSize];
 
         for (int i = 0; i < bufferSize; i++)
             nodes[i] = nullptr;
@@ -141,9 +142,20 @@ public:
 
 };
 
+int HashCntString(const string &key) {
+    int hashed = 0;
+    for (char c : key) {
+        hashed += 31 * c;
+        //hashed %= bufferSize;
+    }
+    return hashed;
+}
+
+int (*p_string)(const string &s) = &HashCntString;
+
 
 int main() {
-    HashTable my_table = HashTable();
+    HashTable<string> my_table = HashTable<string>(8, p_string);
     my_table.insert("Hello");
     my_table.insert("my name is");
     my_table.insert("Islam");
