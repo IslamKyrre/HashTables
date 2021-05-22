@@ -150,7 +150,7 @@ int main() {
     my_table.print();
     my_table.remove("Iskan");
     my_table.remove("Islam");
+    my_table.remove("Islam");
     my_table.print();
-
     return 0;
 }
