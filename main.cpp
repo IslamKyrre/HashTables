@@ -21,6 +21,16 @@ int check_arg(int arg) {
     return 1;
 }
 
+template <typename T>
+int type_check(const T& x){
+    return 0;
+}
+
+template <typename T>
+int (*type_check_ptr)(const T& x) = &type_check;
+
+
+
 
 template<typename T>
 class HashTable {
@@ -42,6 +52,12 @@ public:
         if (!check_arg(bufferSize)) {
             throw EINVARG;
         }
+
+        if(typeid(p) != typeid(type_check_ptr<T>)) {
+            throw EINVARG;
+        }
+
+
         size = 0;
         nodes = new Node<T> *[bufferSize];
 
@@ -199,21 +215,6 @@ public:
         return out;
     }
 
-
-    void print() {
-        if (size == 0) {
-            cout << "No elements in hashtable\n";
-            return;
-        }
-
-        for (int i = 0; i < bufferSize; ++i) {
-            if (nodes[i] != nullptr && !nodes[i]->deleted) {
-                cout << nodes[i]->data << " ";
-            }
-        }
-        cout << "\n";
-    }
-
 };
 
 
@@ -230,9 +231,13 @@ int HashCntInt(const int &key) {
     return key;
 }
 
+
 int (*p_string)(const string &s) = &HashCntString;
 
 int (*p_int)(const int &key) = &HashCntInt;
+
+
+
 
 
 int main() {
