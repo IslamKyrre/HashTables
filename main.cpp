@@ -21,15 +21,13 @@ int check_arg(int arg) {
     return 1;
 }
 
-template <typename T>
-int type_check(const T& x){
+template<typename T>
+int type_check(const T &x) {
     return 0;
 }
 
-template <typename T>
-int (*type_check_ptr)(const T& x) = &type_check;
-
-
+template<typename T>
+int (*type_check_ptr)(const T &x) = &type_check;
 
 
 template<typename T>
@@ -53,7 +51,7 @@ public:
             throw EINVARG;
         }
 
-        if(typeid(p) != typeid(type_check_ptr<T>)) {
+        if (typeid(p) != typeid(type_check_ptr<T>)) {
             throw EINVARG;
         }
 
@@ -124,15 +122,15 @@ public:
                 return true;
             i++;
             hashed += (i * i + i) / 2;
-            //hashed += i;
             hashed %= bufferSize;
         }
         return false;
     }
 
-    bool insert(const T &key) {
-        if (contains(key))
-            return false;
+    void insert(const T &key) {
+        if (contains(key)) {
+            throw EINSERT;
+        }
 
         if (3 * bufferSize <= 4 * (size + 1))
             rehash();
@@ -144,24 +142,22 @@ public:
             if (nodes[hashed] == nullptr) {
                 nodes[hashed] = new Node<T>(key);
                 size++;
-                return true;
+                return;
             } else if (nodes[hashed]->deleted) {
                 nodes[hashed]->data = key;
                 nodes[hashed]->deleted = false;
                 size++;
-                return true;
+                return;
             }
             i++;
             hashed += (i * i + i) / 2;
-            //hashed += i;
             hashed %= bufferSize;
         }
-        return false;
     }
 
-    bool remove(const T &key) {
+    void remove(const T &key) {
         if (!contains(key))
-            return false;
+            throw EREMOVE;
 
         int hashed = hash(key);
         int i = 0;
@@ -170,14 +166,12 @@ public:
             if (!nodes[hashed]->deleted && nodes[hashed]->data == key) {
                 nodes[hashed]->deleted = true;
                 size--;
-                return true;
+                return;
             }
             i++;
             hashed += (i * i + i) / 2;
-            //hashed += i;
             hashed %= bufferSize;
         }
-        return false;
     }
 
 
@@ -222,7 +216,6 @@ int HashCntString(const string &key) {
     int hashed = 0;
     for (char c : key) {
         hashed += 31 * c;
-        //hashed %= bufferSize;
     }
     return hashed;
 }
@@ -236,36 +229,45 @@ int (*p_string)(const string &s) = &HashCntString;
 
 int (*p_int)(const int &key) = &HashCntInt;
 
+int test_cnt = 1;
 
+void passed() {
+    cout << "TEST " << test_cnt++ << " PASSED\n";
+}
 
+void failed() {
+    cout << "TEST " << test_cnt++ << " FAILED\n";
+}
 
 
 int main() {
-    HashTable<int> A = HashTable<int>(p_int);
-    for (int i = 0; i < 10; ++i) {
-        A.insert(i);
-    }
-    A.remove(8);
-    cout << A;
-    /*
-    try{
-        HashTable<int> LOL = HashTable<int> (-3, p_int);
+
+    HashTable<int> *InvArg = nullptr;
+    HashTable<int> *A, *B, *A1, *A2;
+    try {
+        InvArg = new HashTable<int>(p_int, 5);
     } catch (const HashTable<int>::hash_table_error &er) {
         if (er == HashTable<int>::EINVARG) {
-            cout << "Test is working \n";
+            passed();
+        } else {
+            failed();
         }
+    } catch (...) {
+        failed();
     }
-    HashTable<string> table = HashTable<string>(8, p_string);
-    table.insert("Token 0");
-    HashTable<string> table2 = HashTable<string>(table);
-    table.insert("Token 1");
-    table2.insert("Token 2");
-    HashTable<string> table3 = HashTable<string>(32, p_string);
-    table3.insert("HAHA");
-    cout << "table:  " << table;
-    cout << "table2:   " << table2;
-    cout << "table3:   " << table3;
-    table3 = table;
-    cout << "table3:   " << table3;*/
+
+
+
+
+
+
+
+    A = new HashTable<int>(p_int, 4);
+    for (int i = 0; i < 10; ++i) {
+        A->insert(i);
+    }
+    A->remove(8);
+    cout << *A;
+    //A.insert(6);
     return 0;
 }
