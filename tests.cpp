@@ -12,10 +12,19 @@ int HashInt(const int &key) {
     return key;
 }
 
+template <typename T>
+int HashHashTable(const HashTable<T>& key) {
+    return 0;
+}
+
+
 
 int (*p_string)(const string &s) = &HashString;
 
 int (*p_int)(const int &key) = &HashInt;
+
+template <typename T>
+int (*p_hashtable)(const HashTable<T> &key) = &HashHashTable;
 
 
 int test_cnt = 1;
@@ -187,6 +196,30 @@ int main() {
     passed();
 
     cout << "B: " << *B;
+
+
+
+
+    cout << "HASHTABLES OF HASHTABLES \n";
+
+    HashTable<HashTable<int>> H = HashTable<HashTable<int>>(p_hashtable<int>);
+
+    cout << "A: " << *A;
+
+    HashTable<int> C = HashTable<int>(p_int);
+
+    for (int i = 100; i < 110; ++i) {
+        C.insert(i);
+    }
+
+    cout << "C: " << C;
+
+    H.insert(*A);
+    H.insert(C);
+
+    cout << "H: " << H;
+
+
 
 
     delete A;

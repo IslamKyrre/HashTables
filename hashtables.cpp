@@ -11,6 +11,14 @@ public:
     int deleted;
 
     Node(const T &data, int deleted = 0) : data(data), deleted(deleted) {};
+
+    bool operator==(const Node<T> &node) {
+        return data == node.data && deleted == node.deleted;
+    }
+
+    bool operator!=(const Node<T> &node) {
+        return !(*this == node);
+    }
 };
 
 template <typename T>
@@ -198,6 +206,15 @@ public:
         }
         out << "\n";
         return out;
+    }
+
+    bool operator==(const HashTable<T> &table) {
+        if (size != table.size) return false;
+        if (bufferSize != table.bufferSize) return false;
+        for (int i = 0; i < bufferSize; ++i) {
+            if (*nodes[i] != *table.nodes[i]) return false;
+        }
+        return true;
     }
 
 };
