@@ -22,13 +22,6 @@ int check_arg(int arg) {
     return 1;
 }
 
-template<typename T>
-int type_check(const T &x) {
-    return 0;
-}
-
-template<typename T>
-int (*type_check_ptr)(const T &x) = &type_check;
 
 
 template<typename T>
@@ -52,9 +45,6 @@ public:
             throw EINVARG;
         }
 
-        if (typeid(p) != typeid(type_check_ptr<T>)) {
-            throw EINVARG;
-        }
 
 
         size = 0;
@@ -106,7 +96,6 @@ public:
                 nodes[i] = nullptr;
             }
         }
-
         return *this;
     }
 
@@ -153,6 +142,7 @@ public:
             i++;
             hashed += (i * i + i) / 2;
             hashed %= bufferSize;
+
         }
     }
 
@@ -248,7 +238,7 @@ int main() {
     HashTable<int> *A, *A1, *A2;
     HashTable<string> *B;
     try {
-        InvArg = new HashTable<int>(p_int, 5);
+        InvArg = new HashTable<int>(p_int, 36);
     } catch (const HashTable<int>::hash_table_error &er) {
         if (er == HashTable<int>::EINVARG) {
             passed();
@@ -266,6 +256,8 @@ int main() {
         failed();
     }
     passed();
+
+    cout << "A: " << *A;
 
     try {
         B = new HashTable<string>(p_string);
@@ -318,11 +310,30 @@ int main() {
     passed();
 
     try {
+        A->insert(70);
+    } catch (...) {
+        failed();
+    }
+    passed();
+
+    try {
         A->remove(6);
     } catch (...) {
         failed();
     }
     passed();
+
+    try {
+        A->remove(70);
+    } catch (...) {
+        failed();
+    }
+    passed();
+
+
+
+
+
 
     try {
         A1 = new HashTable<int>(*A);
@@ -360,15 +371,31 @@ int main() {
 
     cout << "A2: " << *A2;
 
-
-
-    /*
-    A = new HashTable<int>(p_int, 4);
-    for (int i = 0; i < 10; ++i) {
-        A->insert(i);
+    try {
+        B->insert("Hello");
+        B->insert("My");
+        B->insert("World");
+    } catch (...) {
+        failed();
     }
-    A->remove(8);
-    cout << *A;
-    //A.insert(6);*/
+    passed();
+
+    cout << "B: " << *B;
+
+    try {
+        B->remove("My");
+    } catch (...) {
+        failed();
+    }
+    passed();
+
+    cout << "B: " << *B;
+
+
+    delete A;
+    delete A1;
+    delete A2;
+    delete B;
+
     return 0;
 }
